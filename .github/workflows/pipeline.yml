@@ -1,0 +1,83 @@
+name: Simple Python Test Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  read-config:
+    name: Read Config
+    runs-on: windows-latest
+    outputs:
+      createTestData: ${{ steps.config-output.outputs.createTestData }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Read config.yaml
+        id: config-output
+        run: |
+          CREATE_TEST_DATA=$(python -c "import yaml; print(yaml.safe_load(open('config.yaml'))['createTestData'])")
+          echo "createTestData=$CREATE_TEST_DATA" >> $GITHUB_OUTPUT
+
+  test-data-creation:
+    name: Test Data Creation
+    needs: read-config
+    if: needs.read-config.outputs.createTestData == 'True'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test data creator
+        run: python test_data_creator.py
+
+  test-execution:
+    name: Run Tests
+    needs: [read-config, test-data-creation]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Pytest
+        run: pytest tests/ --maxfail=1 --disable-warnings -v
+
+  data-reconciliation:
+    name: Reconcile Data
+    needs: test-execution
+    runs-on: windows-latest
+    steps:
+      - name: Echo reconciliation
+        run: echo "Data reconciliation complete!"
+
+  reporting:
+    name: Final Report
+    needs: data-reconciliation
+    runs-on: windows-latest
+    steps:
+      - name: Report status
+        run: echo "All steps done. Check your test results and logs!"
