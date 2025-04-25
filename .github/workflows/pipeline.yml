@@ -1,4 +1,4 @@
-name: Simple Python Test Pipeline
+name: Python Test Pipeline
 
 on:
   push:
@@ -25,6 +25,7 @@ jobs:
 
       - name: Read config.yaml
         id: config-output
+        shell: bash  # 🟢 This makes sure the command runs in Bash
         run: |
           CREATE_TEST_DATA=$(python -c "import yaml; print(yaml.safe_load(open('config.yaml'))['createTestData'])")
           echo "createTestData=$CREATE_TEST_DATA" >> $GITHUB_OUTPUT
