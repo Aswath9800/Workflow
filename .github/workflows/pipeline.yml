@@ -25,7 +25,7 @@ jobs:
 
       - name: Read config.yaml
         id: config-output
-        shell: bash  # 🟢 This makes sure the command runs in Bash
+        shell: bash
         run: |
           CREATE_TEST_DATA=$(python -c "import yaml; print(yaml.safe_load(open('config.yaml'))['createTestData'])")
           echo "createTestData=$CREATE_TEST_DATA" >> $GITHUB_OUTPUT
@@ -50,7 +50,7 @@ jobs:
         run: python test_data_creator.py
 
   test-execution:
-    name: Run Tests
+    name: Test Data Execution
     needs: [read-config, test-data-creation]
     runs-on: windows-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
         run: pytest tests/ --maxfail=1 --disable-warnings -v
 
   data-reconciliation:
-    name: Reconcile Data
+    name: Data Reconciliation
     needs: test-execution
     runs-on: windows-latest
     steps:
@@ -76,7 +76,7 @@ jobs:
         run: echo "Data reconciliation complete!"
 
   reporting:
-    name: Final Report
+    name: Report
     needs: data-reconciliation
     runs-on: windows-latest
     steps:
