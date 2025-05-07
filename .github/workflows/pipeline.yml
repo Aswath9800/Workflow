@@ -49,22 +49,22 @@ jobs:
       - name: Run test data creator
         run: python test_data_creator.py
 
-    test-execution:
-      name: Test Data Execution
-      needs: [ read-config, test-data-creation ]
-      runs-on: windows-latest
-      steps:
-        - uses: actions/checkout@v3
+  test-execution:
+    name: Test Data Execution
+    needs: [ read-config, test-data-creation ]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
 
-        - name: Set up Python
-          uses: actions/setup-python@v4
-          with:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
            python-version: '3.10'
 
-        - name: Install dependencies
-          run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-        - name: Run Pytest
-          run: pytest tests/ --maxfail=1 --disable-warnings -v
+      - name: Run Pytest
+        run: pytest tests/ --maxfail=1 --disable-warnings -v
 
 
